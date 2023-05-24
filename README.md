@@ -22,7 +22,7 @@ console.log(userName.val); // calling a getter
 ```
 
 When set to same value does not trigger update of dependencies.
-```
+```js
 let x = ref(1);
 x.val = 1; // dependencies will not be notified
 ```
