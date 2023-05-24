@@ -38,6 +38,7 @@ b.val = obj; // but this will not
 ```
 
 
+
 ### `computed(calcCallback)`
 
 `Autowiring`: yes
@@ -51,6 +52,7 @@ let b = ref(2);
 let c = computed(() => a.val + b.val);
 console.log(c.val); // 3
 ```
+
 
 
 ### `effect(callback)`
@@ -74,6 +76,7 @@ b.val = 4; // will output: "a = 2, b = 4"
 ```
 
 
+
 ### `subscribe(source, callback)`
 Calls a function when source changed. More lightweight version of `effect` but for single source.
 
@@ -88,6 +91,7 @@ subscribe(a, (value) => {
 
 a.val = 2; // will output: "a = 2"
 ```
+
 
 
 ### `transaction(callback)`
