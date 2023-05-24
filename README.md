@@ -11,6 +11,7 @@ JavaScript lightweight reactivity lib inspired by Vue
 
 ### Ref(initialValue)
 A source of changes propagation. State contains a single value.
+
 Reactive state that can have multiple dependencies (subscribers).
 
 ```js
@@ -40,6 +41,7 @@ b.val = obj; // but this will not
 ### Computed(calcCallback)
 
 `Autowiring`: yes
+
 `Lazy`: yes
 
 ```js
@@ -53,10 +55,12 @@ console.log(c.val); // 3
 
 ### Effect(callback)
 Calls a function when any of sources changed.
-Runs function single time when created to collect dependencies.
-`Autowiring`: yes
-`Lazy`: no
 
+Runs function single time when created to collect dependencies.
+
+`Autowiring`: yes
+
+`Lazy`: no
 ```js
 let a = ref(1);
 let b = ref(3);
@@ -72,9 +76,10 @@ b.val = 4; // will output: "a = 2, b = 4"
 
 ### Subscribe(source, callback)
 Calls a function when source changed. More lightweight version of `effect` but for single source.
-`Autowiring`: no. use only if result depends on a single reactive source
-`Lazy`: no
 
+`Autowiring`: no. use only if result depends on a single reactive source
+
+`Lazy`: no
 ```js
 let a = ref(1);
 subscribe(a, (value) => {
@@ -87,6 +92,7 @@ a.val = 2; // will output: "a = 2"
 
 ### Transaction(callback)
 Calls a function. During the call collecting active (non-lazy) dependencies, instead of update dependencies immediately. After transaction function finishes runs all collected updates.
+
 This allow to avoid unnecessary calculations or multiple runs of effect (subscriber) when multiple sources are changed.
 ```js
 let a = ref(1);
