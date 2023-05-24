@@ -65,7 +65,7 @@ Runs function single time when created to collect dependencies.
 let a = ref(1);
 let b = ref(3);
 effect(() => {
-	console.log(`a = ${a.val}, b = ${b.val}`);
+    console.log(`a = ${a.val}, b = ${b.val}`);
 });
 // will output: "a = 1, b = 3"
 
@@ -83,7 +83,7 @@ Calls a function when source changed. More lightweight version of `effect` but f
 ```js
 let a = ref(1);
 subscribe(a, (value) => {
-	console.log(`a = ${value}`);
+    console.log(`a = ${value}`);
 });
 
 a.val = 2; // will output: "a = 2"
@@ -100,17 +100,17 @@ let b = ref(3);
 let calls = 0;
 
 let c = computed(() => {
-	calls++;
-	return a.val + b.val;
+    calls++;
+    return a.val + b.val;
 });
 
 effect(() => {
-	console.log(c.val);
+    console.log(c.val);
 });
 
 transaction(() => {
-	a.val = 2;
-	b.val = 4;
+    a.val = 2;
+    b.val = 4;
 });
 // effect will be called only once at the end of transaction and will output: "6"
 console.log(calls); // will output: "1"
