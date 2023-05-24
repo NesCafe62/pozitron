@@ -100,7 +100,7 @@ a.val = 2; // will output: "a = 2"
 
 
 ### `transaction(callback)`
-Calls a function. During the call collecting active (non-lazy) dependencies, instead of update dependencies immediately. After transaction function finishes runs all collected updates.
+Calls a function. During the call collecting active (non-lazy) dependencies, instead of update dependencies immediately. After transaction function finished it runs all collected updates.
 
 This allow to avoid unnecessary calculations or multiple runs of effect (subscriber) when multiple sources are changed.
 ```js
