@@ -40,10 +40,15 @@ b.val = obj; // but this will not
 
 
 ### `computed(calcCallback)`
+Reactive state that value depends on one or multiple reactive sources. Is similar to `ref` but calculated based on other reactive sources.
+
+Also a source of changes propagation. State contains a single value.
+
+`.val` getter returns cached value, while dependencies stay unchanged since last calculation call.
 
 `Autowiring`: yes
 
-`Lazy`: yes
+`Lazy`: yes. calculation callback will run only after `.val` property is accessed
 
 ```js
 let a = ref(1);
