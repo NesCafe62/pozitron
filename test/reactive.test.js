@@ -1,164 +1,160 @@
-import { ref, computed } from '../src/reactive';
+import { ref, memo } from '../src/reactive';
 
-it('computed get value (a,b)->c test', () => {
-	let a = ref(1);
-	let b = ref(2);
-	let c = computed(() => a.val + b.val);
-	expect(c.val).toBe(3);
+it('memo get value (a,b)->c test', () => {
+	let [a, setA] = ref(1);
+	let [b, setB] = ref(2);
+	let c = memo(() => a() + b());
+	expect(c()).toBe(3);
 });
 
 it('ref notify dependencies only if value changed test', () => {
 	let calls = 0;
-	let a = ref(1);
-	let b = computed(() => {
+	let [a, setA] = ref(1);
+	let b = memo(() => {
 		calls++;
-		return a.val + 100;
+		return a() + 100;
 	});
-	b.val; // evaluate b
+	b(); // evaluate b
 	expect(calls).toBe(1);
 
-	a.val = 1;
+	setA(1);
 	expect(calls).toBe(1);
 });
 
-it('computed return cached value if dependencies not changed (a,b)->c test', () => {
+it('memo return cached value if dependencies not changed (a,b)->c test', () => {
 	let calls = 0;
-	let a = ref(1);
-	let b = ref(2);
-	let c = computed(() => {
+	let [a, setA] = ref(1);
+	let [b, setB] = ref(2);
+	let c = memo(() => {
 		calls++;
-		return a.val + b.val;
+		return a() + b();
 	});
-	let cVal = c.val;
-	expect(cVal).toBe(3);
+	expect(c()).toBe(3);
 	expect(calls).toBe(1);
 
-	cVal = c.val;
-	expect(cVal).toBe(3);
+	expect(c()).toBe(3);
 	expect(calls).toBe(1);
 });
 
-it('computed return cached value if dependencies not changed a->b->c test', () => {
+it('memo return cached value if dependencies not changed a->b->c test', () => {
 	let callsB = 0, callsC = 0;
-	let a = ref(1);
-	let b = computed(() => {
+	let [a, setA] = ref(1);
+	let b = memo(() => {
 		callsB++;
-		return a.val + 100;
+		return a() + 100;
 	});
-	let c = computed(() => {
+	let c = memo(() => {
 		callsC++;
-		return b.val + 100;
+		return b() + 100;
 	});
-	let bVal = b.val;
-	expect(bVal).toBe(101);
+	expect(b()).toBe(101);
 	expect(callsB).toBe(1);
 	expect(callsC).toBe(0);
 
-	let cVal = c.val;
-	expect(cVal).toBe(201);
+	expect(c()).toBe(201);
 	expect(callsB).toBe(1);
 	expect(callsC).toBe(1);
 });
 
-it('computed update a->b->c test', () => {
-	let a = ref(1);
-	let b = computed(() => a.val + 100);
-	let c = computed(() => b.val + 100);
-	expect(b.val).toBe(101);
-	expect(c.val).toBe(201);
+it('memo update a->b->c test', () => {
+	let [a, setA] = ref(1);
+	let b = memo(() => a() + 100);
+	let c = memo(() => b() + 100);
+	expect(b()).toBe(101);
+	expect(c()).toBe(201);
 
-	a.val = 2;
-	expect(b.val).toBe(102);
-	expect(c.val).toBe(202);
+	setA(2);
+	expect(b()).toBe(102);
+	expect(c()).toBe(202);
 
-	a.val = 3;
-	expect(b.val).toBe(103);
-	expect(c.val).toBe(203);
+	setA(3);
+	expect(b()).toBe(103);
+	expect(c()).toBe(203);
 });
 
-it('computed update2 (a,b)->c test', () => {
-	let a = ref(1);
-	let b = ref(2);
-	let c = computed(() => a.val + b.val);
-	expect(c.val).toBe(3);
+it('memo update2 (a,b)->c test', () => {
+	let [a, setA] = ref(1);
+	let [b, setB] = ref(2);
+	let c = memo(() => a() + b());
+	expect(c()).toBe(3);
 
-	a.val = 2;
-	expect(c.val).toBe(4);
+	setA(2);
+	expect(c()).toBe(4);
 
-	b.val = 3;
-	expect(c.val).toBe(5);
+	setB(3);
+	expect(c()).toBe(5);
 });
 
-it('computed update3 (a,b)->c (b update before a) test', () => {
-	let a = ref(1);
-	let b = ref(2);
-	let c = computed(() => a.val + b.val);
-	expect(c.val).toBe(3);
+it('memo update3 (a,b)->c (b update before a) test', () => {
+	let [a, setA] = ref(1);
+	let [b, setB] = ref(2);
+	let c = memo(() => a() + b());
+	expect(c()).toBe(3);
 
-	b.val = 3;
-	expect(c.val).toBe(4);
+	setB(3);
+	expect(c()).toBe(4);
 
-	a.val = 2;
-	expect(c.val).toBe(5);
+	setA(2);
+	expect(c()).toBe(5);
 });
 
-it('computed lazyness (a,b)->c test', () => {
+it('memo lazyness (a,b)->c test', () => {
 	let calls = 0;
-	let a = ref(1);
-	let b = ref(2);
-	let c = computed(() => {
+	let [a, setA] = ref(1);
+	let [b, setB] = ref(2);
+	let c = memo(() => {
 		calls++;
-		return a.val + b.val;
+		return a() + b();
 	});
-	a.val = 2;
-	b.val = 3;
+	setA(2);
+	setB(3);
 	expect(calls).toBe(0);
 
-	c.val; // evaludate c
+	c(); // evaludate c
 	expect(calls).toBe(1);
-	expect(c.val).toBe(5);
+	expect(c()).toBe(5);
 });
 
-it('computed lazyness2 a->b->c test', () => {
+it('memo lazyness2 a->b->c test', () => {
 	let callsB = 0, callsC = 0;
-	let a = ref(1);
-	let b = computed(() => {
+	let [a, setA] = ref(1);
+	let b = memo(() => {
 		callsB++;
-		return a.val + 100;
+		return a() + 100;
 	});
-	let c = computed(() => {
+	let c = memo(() => {
 		callsC++;
-		return b.val + 100;
+		return b() + 100;
 	});
-	a.val = 2;
+	setA(2);
 	expect(callsB).toBe(0);
 	expect(callsC).toBe(0);
 
-	c.val; // evaludate c
+	c(); // evaludate c
 	expect(callsB).toBe(1);
 	expect(callsC).toBe(1);
 });
 
-it('computed lazyness3 a->b->c (access b before c) test', () => {
+it('memo lazyness3 a->b->c (access b before c) test', () => {
 	let callsB = 0, callsC = 0;
-	let a = ref(1);
-	let b = computed(() => {
+	let [a, setA] = ref(1);
+	let b = memo(() => {
 		callsB++;
-		return a.val + 100;
+		return a() + 100;
 	});
-	let c = computed(() => {
+	let c = memo(() => {
 		callsC++;
-		return b.val + 100;
+		return b() + 100;
 	});
-	a.val = 2;
+	setA(2);
 	expect(callsB).toBe(0);
 	expect(callsC).toBe(0);
 
-	b.val; // evaludate b
+	b(); // evaludate b
 	expect(callsB).toBe(1);
 	expect(callsC).toBe(0);
 
-	c.val; // evaludate c
+	c(); // evaludate c
 	expect(callsB).toBe(1);
 	expect(callsC).toBe(1);
 });

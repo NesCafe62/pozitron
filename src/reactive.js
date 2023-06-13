@@ -1,142 +1,155 @@
+let Listener = null;
 
-let transactionQueue = null;
-let transactionLevel = 0;
-
-export function transaction(func) {
-	if (transactionLevel === 0) {
-		transactionQueue = [];
+function updateNode(node) {
+	const prev = Listener;
+	Listener = node;
+	let newVal;
+	try {
+		newVal = node.fn();
+		node.needUpdate = false;
+	} finally {
+		Listener = prev;
 	}
-	transactionLevel++;
-	func(); // todo: try finally
-	transactionLevel--;
-	if (transactionLevel === 0) {
-		let queue = transactionQueue;
-		transactionQueue = null;
-		queue.forEach( function(dep) {
-			dep();
+	return newVal;
+}
+
+
+let batchQueue = null;
+let batchDepth = 0;
+
+export function batch(fn) {
+	if (batchDepth === 0) {
+		batchQueue = [];
+	}
+	batchDepth++;
+	try {
+		fn();
+	} finally {
+		batchDepth--;
+	}
+	if (batchDepth === 0) {
+		let queue = batchQueue;
+		batchQueue = null;
+		queue.forEach( function(node) {
+			updateNode(node);
 		});
 	}
 }
 
 
-
-let activeDep = null;
-
-export function ref(val) {
-	const raw = { val: val };
-	const deps = new Set();
-	return Object.create(Object.prototype, {
-		$raw: { value: raw },
-		$deps: { value: deps },
-		val: {
-			get: function() {
-				if (activeDep) {
-					deps.add(activeDep);
-				}
-				return raw.val;
-			},
-			set: function(newValue) {
-				if (newValue !== raw.val) {
-					raw.val = newValue;
-					deps.forEach(function(d) {
-						d();
-					});
-				}
-			}
-		}
-	});
+function readNode() {
+	if (Listener) {
+		Listener.sources.push(this);
+		Listener.sourceSlots.push(this.observers.length);
+		this.observers.push(Listener);
+		this.observerSlots.push(Listener.sources.length - 1);
+	}
+	return this.value;
 }
 
-export function effect(func) {
-	let needUpdate = false;
-	function update() {
-		activeDep = dep;
-		func();
-		activeDep = null;
-		needUpdate = false;
-	}
-	function dep() {
-		if (needUpdate) {
-			return;
-		}
-		needUpdate = true;
-		if (transactionQueue) {
-			transactionQueue.push(update);
-		} else {
-			update();
-		}
-	}
-	dep();
-}
-
-export function subscribe(r, func) {
-	let needUpdate = false;
-	func(r.val);
-	function update() {
-		func(r.val);
-		needUpdate = false;
-	}
-	r.$deps.add( function() {
-		if (needUpdate) {
-			return;
-		}
-		needUpdate = true;
-		if (transactionQueue) {
-			transactionQueue.push(update);
-		} else {
-			update();
-		}
-	});
-}
-
-// let activeDepName = null;
-
-export function computed(func, name) {
-	const raw = { val: null };
-	let needUpdate = true;
-	const deps = new Set();
-	function invalidate() {
-		if (needUpdate) {
-			return;
-		}
-		needUpdate = true;
-		deps.forEach(function(d) {
-			d();
+function writeNode(newVal) {
+	if (newVal !== this.value) {
+		this.value = newVal;
+		const observers = Array.from(this.observers);
+		observers.forEach(obs => {
+			obs.notify();
 		});
 	}
-	function update() {
-		if (!needUpdate) {
-			return;
-		}
-		// const prevDepName = activeDepName;
-		// activeDepName = name;
-		const prevDep = activeDep;
-		activeDep = invalidate;
-		const newValue = func();
-		needUpdate = false;
-		activeDep = prevDep;
-		// activeDepName = prevDepName;
-		if (newValue !== raw.val) {
-			raw.val = newValue;
-			deps.forEach(function(d) {
-				d();
-			});
+}
+
+function cleanupNode(node) {
+	for (let i = 0; i < node.sources.length; i++) {
+		let source = node.sources[i];
+		let sSlot = node.sourceSlots[i];
+		let obs = source.observers.pop();
+		let obsSlot = source.observerSlots.pop();
+		if (sSlot < source.observers.length) {
+			source.observers[sSlot] = obs;
+			source.observerSlots[sSlot] = obsSlot;
 		}
 	}
-	return Object.create(Object.prototype, {
-		$raw: { value: raw },
-		$deps: { value: deps },
-		val: {
-			get: function() {
-				update();
-				if (activeDep) {
-					deps.add(activeDep);
-				}
-				return raw.val;
-			},
-			set(newValue) {
-				console.error('Unable to set computed');
-			}
-		}
+	// clear sources
+	node.sources.splice(0);
+	node.sourceSlots.splice(0);
+}
+
+
+function createNode(value, fn, name) {
+	return {
+		name: name,
+		fn: fn,
+		needUpdate: false,
+		value: value,
+		notify: undefined,
+		observers: undefined,
+		observerSlots: undefined,
+		sources: undefined,
+		sourceSlots: undefined
+	};
+}
+
+export function ref(initial, name) {
+	const node = createNode(initial, undefined, name || null);
+	node.observers = [];
+	node.observerSlots = [];
+	return [readNode.bind(node), writeNode.bind(node)];
+}
+
+
+function notifyEffect() {
+	if (this.needUpdate) {
+		return;
+	}
+	this.needUpdate = true;
+	cleanupNode(this);
+	if (batchQueue) {
+		batchQueue.push(this);
+	} else {
+		updateNode(this);
+	}
+}
+
+function destroyEffect() {
+	cleanupNode(this);
+}
+
+export function effect(fn, name) {
+	const node = createNode(undefined, fn, name || null);
+	node.sources = [];
+	node.sourceSlots = [];
+	node.notify = notifyEffect;
+	updateNode(node);
+	return destroyEffect.bind(node);
+}
+
+
+function readMemo() {
+	if (this.needUpdate) {
+		const newVal = updateNode(this);
+		writeNode.call(this, newVal);
+	}
+	return readNode.call(this);
+}
+
+function notifyMemo() {
+	if (this.needUpdate) {
+		return;
+	}
+	this.needUpdate = true;
+	cleanupNode(this);
+	const observers = Array.from(this.observers);
+	observers.forEach(obs => {
+		obs.notify();
 	});
+}
+
+export function memo(fn, name) {
+	const node = createNode(null, fn, name || null);
+	node.observers = [];
+	node.observerSlots = [];
+	node.sources = [];
+	node.sourceSlots = [];
+	node.notify = notifyMemo;
+	node.needUpdate = true;
+	return readMemo.bind(node);
 }

@@ -1,15 +1,25 @@
 {
-  "name": "reactive-test",
+  "name": "pozitron-js",
+  "description": "lightweight reactivity library",
+  "version": "2.0.0",
+  "author": "Petr Gostin",
+  "license": "MIT",
   "type": "module",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/NesCafe62/pozitron"
+  },
   "scripts": {
     "test": "cross-env NODE_OPTIONS=--experimental-vm-modules jest",
     "test_": "node --experimental-vm-modules node_modules/jest/bin/jest.js"
   },
-  "author": "",
-  "license": "MIT",
+  "homepage": "https://github.com/NesCafe62/pozitron",
+  "bugs": {
+    "web": "https://github.com/NesCafe62/pozitron/issues"
+  },
+  "keywords": [
+    "reactivity"
+  ],
   "devDependencies": {
     "cross-env": "^7.0.3",
     "jest": "^26.1.0"
