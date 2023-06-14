@@ -84,7 +84,6 @@ setB(4); // will output: "a = 2, b = 4"
 
 
 ### `subscribe(source, callback)`
-Note: not implemented in current version yet
 
 Calls a function when source changed. More lightweight version of `effect` but for single source.
 
