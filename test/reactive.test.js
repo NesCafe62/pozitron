@@ -1,3 +1,4 @@
+import { expect, it } from 'vitest';
 import { ref, memo } from '../src/reactive';
 
 it('memo get value (a,b)->c test', () => {

@@ -10,8 +10,9 @@
     "url": "https://github.com/NesCafe62/pozitron"
   },
   "scripts": {
-    "test": "cross-env NODE_OPTIONS=--experimental-vm-modules jest",
-    "test_": "node --experimental-vm-modules node_modules/jest/bin/jest.js"
+    "test": "vitest run",
+    "test:ui": "vitest --ui",
+    "test:watch": "vitest"
   },
   "homepage": "https://github.com/NesCafe62/pozitron",
   "bugs": {
@@ -21,7 +22,7 @@
     "reactivity"
   ],
   "devDependencies": {
-    "cross-env": "^7.0.3",
-    "jest": "^26.1.0"
+    "@vitest/ui": "^0.32.0",
+    "vitest": "^0.32.0"
   }
 }
