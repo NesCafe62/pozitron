@@ -46,11 +46,11 @@ Reactive state that value depends on one or multiple reactive sources. Is simila
 
 Also a source of changes propagation. State contains a single value.
 
-`.val` getter returns cached value, while dependencies stay unchanged since last calculation call.
+Getter returns cached value, while dependencies stay unchanged since last calculation call.
 
 `Autowiring`: yes
 
-`Lazy`: yes. calculation callback will run only after `.val` property is accessed
+`Lazy`: yes. calculation callback will run only after getter function is accessed
 
 ```js
 let [a, setA] = ref(1);
