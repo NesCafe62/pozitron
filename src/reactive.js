@@ -1,19 +1,3 @@
-let Listener = null;
-
-function updateNode(node) {
-	const prev = Listener;
-	Listener = node;
-	let newVal;
-	try {
-		newVal = node.fn();
-		node.needUpdate = false;
-	} finally {
-		Listener = prev;
-	}
-	return newVal;
-}
-
-
 let batchQueue = null;
 let batchDepth = 0;
 
@@ -28,14 +12,25 @@ export function batch(fn) {
 		batchDepth--;
 	}
 	if (batchDepth === 0) {
-		let queue = batchQueue;
+		const queue = batchQueue;
 		batchQueue = null;
-		queue.forEach( function(node) {
-			updateNode(node);
-		});
+		const length = queue.length;
+		const prev = Listener;
+		try {
+			for (let i = 0; i < length; i++) {
+				const node = queue[i];
+				Listener = node.isStatic ? null : node;
+				node.fn();
+				node.needUpdate = false;
+			}
+		} finally {
+			Listener = prev;
+		}
 	}
 }
 
+
+let Listener = null;
 
 function readNode() {
 	if (Listener) {
@@ -50,21 +45,36 @@ function readNode() {
 function writeNode(newVal) {
 	if (newVal !== this.value) {
 		this.value = newVal;
-		const observers = Array.from(this.observers);
-		observers.forEach(obs => {
-			obs.notify();
-		});
+		const obs = this.observers;
+		const length = obs.length;
+		for (let i = 0; i < length; i++) {
+			obs[i].notify();
+		}
+	}
+}
+
+function updateNode(node) {
+	const prev = Listener;
+	Listener = node.isStatic ? null : node;
+	try {
+		const newVal = node.fn();
+		node.needUpdate = false;
+		return newVal;
+	} finally {
+		Listener = prev;
 	}
 }
 
 function cleanupNode(node) {
-	for (let i = 0; i < node.sources.length; i++) {
-		let source = node.sources[i];
-		let sSlot = node.sourceSlots[i];
-		let obs = source.observers.pop();
-		let obsSlot = source.observerSlots.pop();
-		if (sSlot < source.observers.length) {
-			source.observers[sSlot] = obs;
+	const length = node.sources.length;
+	for (let i = 0; i < length; i++) {
+		const source = node.sources[i];
+		const sSlot = node.sourceSlots[i];
+		const sObservers = source.observers;
+		const obs = sObservers.pop();
+		const obsSlot = source.observerSlots.pop();
+		if (sSlot < sObservers.length) {
+			sObservers[sSlot] = obs;
 			source.observerSlots[sSlot] = obsSlot;
 		}
 	}
@@ -84,7 +94,8 @@ function createNode(value, fn, name) {
 		observers: undefined,
 		observerSlots: undefined,
 		sources: undefined,
-		sourceSlots: undefined
+		sourceSlots: undefined,
+		isStatic: false
 	};
 }
 
@@ -101,7 +112,9 @@ function notifyEffect() {
 		return;
 	}
 	this.needUpdate = true;
-	cleanupNode(this);
+	if (!this.isStatic) {
+		cleanupNode(this);
+	}
 	if (batchQueue) {
 		batchQueue.push(this);
 	} else {
@@ -113,12 +126,57 @@ function destroyEffect() {
 	cleanupNode(this);
 }
 
-export function effect(fn, name) {
-	const node = createNode(undefined, fn, name || null);
+function createEffect(fn, options) {
+	const node = createNode(undefined, fn, options.name || null);
+	if (options.once) {
+		node.fn = function() {
+			fn();
+			destroyEffect(node);
+		};
+	}
+	node._s = new Set();
 	node.sources = [];
 	node.sourceSlots = [];
 	node.notify = notifyEffect;
+	return node;
+}
+
+export function effect(fn, options = {}) {
+	const node = createEffect(fn, options);
 	updateNode(node);
+	return destroyEffect.bind(node);
+}
+
+
+export function untrack(fn) {
+	if (Listener === null) {
+		return fn();
+	}	
+	const prev = Listener;
+	Listener = null;
+	try {
+		return fn();
+	} finally {
+		Listener = prev;
+	}
+}
+
+
+// todo: add subscribe and untrack tests
+export function subscribe(getters, fn, name) {
+	const sources = Array.isArray(getters) ? getters : [getters];
+	const node = createEffect(function() {
+		const length = sources.length;
+		const values = Array(length);
+		for (let i = 0; i < length; i++) {
+			values[i] = sources[i]();
+		}
+		Listener = null;
+		fn.apply(null, values);
+		node.needUpdate = false;
+	}, options);
+	updateNode(node);
+	node.isStatic = true; // freeze node sources
 	return destroyEffect.bind(node);
 }
 
@@ -137,10 +195,11 @@ function notifyMemo() {
 	}
 	this.needUpdate = true;
 	cleanupNode(this);
-	const observers = Array.from(this.observers);
-	observers.forEach(obs => {
-		obs.notify();
-	});
+	const obs = this.observers;
+	const length = obs.length;
+	for (let i = 0; i < length; i++) {
+		obs[i].notify();
+	}
 }
 
 export function memo(fn, name) {
