@@ -11,7 +11,7 @@ No more virual DOM required. Fine-grained reactivity rocks.
 
 ## Usage
 
-### `ref(initialValue)`
+### `ref(initialValue, name = null)`
 A source of changes propagation. State contains a single value.
 
 Reactive state that can have multiple dependencies (subscribers).
@@ -41,7 +41,7 @@ setB(obj); // but this will not
 
 
 
-### `memo(calcCallback)`
+### `memo(calcCallback, name = null)`
 Reactive state that value depends on one or multiple reactive sources. Is similar to `ref` but calculated based on other reactive sources.
 
 Also a source of changes propagation. State contains a single value.
@@ -62,7 +62,7 @@ console.log(c()); // 3
 
 
 
-### `effect(callback)`
+### `effect(callback, options = {once: false, name: null})`
 Calls a function when any of sources changed.
 
 Runs function single time when created to collect dependencies.
@@ -84,7 +84,7 @@ setB(4); // will output: "a = 2, b = 4"
 
 
 
-### `subscribe(source, callback)`
+### `subscribe(sources, callback, options = {once: false, name: null})`
 
 Calls a function when source changed. More lightweight version of `effect` but for single source.
 
@@ -98,6 +98,15 @@ subscribe(a, (value) => {
 });
 
 setA(2); // will output: "a = 2"
+```
+
+Subscribe to multiple sources:
+```js
+let [a, setA] = ref(1);
+let [b, setB] = ref(2);
+subscribe([a, b], (valueA, valueB) => {
+    console.log(`a = ${valueA}, b = ${valueB}`);
+});
 ```
 
 
