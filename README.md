@@ -1,5 +1,6 @@
 # Pozitron
 JavaScript lightweight reactivity lib inspired by Vue, $mol, SolidJS, Quarx.
+
 No more virual DOM required. Fine-grained reactivity rocks.
 
 ## Features
