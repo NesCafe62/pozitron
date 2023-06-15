@@ -95,8 +95,8 @@ function createNode(value, fn, name) {
 	};
 }
 
-export function signal(initial, name) {
-	const node = createNode(initial, undefined, name || null);
+export function signal(initial, name = null) {
+	const node = createNode(initial, undefined, name);
 	node.observers = [];
 	return [readNode.bind(node), writeNode.bind(node)];
 }
@@ -156,7 +156,7 @@ export function untrack(fn) {
 
 
 // todo: add subscribe and untrack tests
-export function subscribe(getters, fn, name) {
+export function subscribe(getters, fn, options = {}) {
 	const sources = Array.isArray(getters) ? getters : [getters];
 	const node = createEffect(function() {
 		const length = sources.length;
@@ -195,8 +195,8 @@ function notifyMemo() {
 	}
 }
 
-export function memo(fn, name) {
-	const node = createNode(null, fn, name || null);
+export function memo(fn, name = null) {
+	const node = createNode(null, fn, name);
 	node.observers = [];
 	node.sources = [];
 	node.notify = notifyMemo;
