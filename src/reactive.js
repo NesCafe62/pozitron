@@ -34,10 +34,9 @@ let Listener = null;
 
 function readNode() {
 	if (Listener) {
-		Listener.sources.push(this);
-		Listener.sourceSlots.push(this.observers.length);
-		this.observers.push(Listener);
-		this.observerSlots.push(Listener.sources.length - 1);
+		const index = Listener.sources.length;
+		Listener.sources.push(this, this.observers.length);
+		this.observers.push(Listener, index);
 	}
 	return this.value;
 }
@@ -47,7 +46,7 @@ function writeNode(newVal) {
 		this.value = newVal;
 		const obs = this.observers;
 		const length = obs.length;
-		for (let i = 0; i < length; i++) {
+		for (let i = 0; i < length; i += 2) {
 			obs[i].notify();
 		}
 	}
@@ -67,20 +66,19 @@ function updateNode(node) {
 
 function cleanupNode(node) {
 	const length = node.sources.length;
-	for (let i = 0; i < length; i++) {
+	for (let i = 0; i < length; i += 2) {
 		const source = node.sources[i];
-		const sSlot = node.sourceSlots[i];
-		const sObservers = source.observers;
-		const obs = sObservers.pop();
-		const obsSlot = source.observerSlots.pop();
-		if (sSlot < sObservers.length) {
-			sObservers[sSlot] = obs;
-			source.observerSlots[sSlot] = obsSlot;
+		const sourceSlot = node.sources[i + 1];
+		const observers = source.observers;
+		const obs = observers.pop();
+		const obsSlot = observers.pop();
+		if (sourceSlot < observers.length) {
+			observers[sourceSlot] = obs;
+			observers[sourceSlot + 1] = obsSlot;
 		}
 	}
 	// clear sources
 	node.sources.splice(0);
-	node.sourceSlots.splice(0);
 }
 
 
@@ -92,9 +90,7 @@ function createNode(value, fn, name) {
 		value: value,
 		notify: undefined,
 		observers: undefined,
-		observerSlots: undefined,
 		sources: undefined,
-		sourceSlots: undefined,
 		isStatic: false
 	};
 }
@@ -102,7 +98,6 @@ function createNode(value, fn, name) {
 export function signal(initial, name) {
 	const node = createNode(initial, undefined, name || null);
 	node.observers = [];
-	node.observerSlots = [];
 	return [readNode.bind(node), writeNode.bind(node)];
 }
 
@@ -135,7 +130,6 @@ function createEffect(fn, options) {
 		};
 	}
 	node.sources = [];
-	node.sourceSlots = [];
 	node.notify = notifyEffect;
 	return node;
 }
@@ -196,7 +190,7 @@ function notifyMemo() {
 	cleanupNode(this);
 	const obs = this.observers;
 	const length = obs.length;
-	for (let i = 0; i < length; i++) {
+	for (let i = 0; i < length; i += 2) {
 		obs[i].notify();
 	}
 }
@@ -204,9 +198,7 @@ function notifyMemo() {
 export function memo(fn, name) {
 	const node = createNode(null, fn, name || null);
 	node.observers = [];
-	node.observerSlots = [];
 	node.sources = [];
-	node.sourceSlots = [];
 	node.notify = notifyMemo;
 	node.needUpdate = true;
 	return readMemo.bind(node);
