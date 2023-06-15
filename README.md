@@ -11,13 +11,13 @@ No more virual DOM required. Fine-grained reactivity rocks.
 
 ## Usage
 
-### `ref(initialValue, name = null)`
+### `signal(initialValue, ?name: String)`
 A source of changes propagation. State contains a single value.
 
 Reactive state that can have multiple dependencies (subscribers).
 
 ```js
-let [userName, setUserName] = ref('John');
+let [userName, setUserName] = signal('John');
 
 setUserName('Alice'); // set userName
 console.log(userName()); // get userName
@@ -25,24 +25,24 @@ console.log(userName()); // get userName
 
 When set to same value it does not trigger update of dependencies.
 ```js
-let [x, setX] = ref(1);
+let [x, setX] = signal(1);
 setX(1); // dependencies will not be notified
 ```
 
 New value is comparted by value (by reference for objects and arrays).
 ```js
-let [a, setA] = ref({x: 1});
+let [a, setA] = signal({x: 1});
 setA({x: 1}); // this will trigger dependencies update
 
 let obj = {x: 1};
-let [b, setB] = ref(obj);
+let [b, setB] = signal(obj);
 setB(obj); // but this will not
 ```
 
 
 
-### `memo(calcCallback, name = null)`
-Reactive state that value depends on one or multiple reactive sources. Is similar to `ref` but calculated based on other reactive sources.
+### `memo(calcCallback, ?name: String)`
+Reactive state that value depends on one or multiple reactive sources. Is similar to `signal` but calculated based on other reactive sources.
 
 Also a source of changes propagation. State contains a single value.
 
@@ -53,8 +53,8 @@ Getter returns cached value, while dependencies stay unchanged since last calcul
 `Lazy`: yes. calculation callback will run only after getter function is accessed
 
 ```js
-let [a, setA] = ref(1);
-let [b, setB] = ref(2);
+let [a, setA] = signal(1);
+let [b, setB] = signal(2);
 
 let c = memo(() => a() + b());
 console.log(c()); // 3
@@ -62,7 +62,7 @@ console.log(c()); // 3
 
 
 
-### `effect(callback, options = {once: false, name: null})`
+### `effect(callback, ?options: {?once: Boolean, ?name: String} = {})`
 Calls a function when any of sources changed.
 
 Runs function single time when created to collect dependencies.
@@ -71,8 +71,8 @@ Runs function single time when created to collect dependencies.
 
 `Lazy`: no
 ```js
-let [a, setA] = ref(1);
-let [b, setB] = ref(3);
+let [a, setA] = signal(1);
+let [b, setB] = signal(3);
 effect(() => {
     console.log(`a = ${a()}, b = ${b()}`);
 });
@@ -84,7 +84,9 @@ setB(4); // will output: "a = 2, b = 4"
 
 
 
-### `subscribe(sources, callback, options = {once: false, name: null})`
+### `subscribe(sources, callback, ?options: {?once: Boolean, ?name: String} = {})`
+
+* `sources` - a single getter function or array of getters
 
 Calls a function when source changed. More lightweight version of `effect` but for single source.
 
@@ -92,7 +94,7 @@ Calls a function when source changed. More lightweight version of `effect` but f
 
 `Lazy`: no
 ```js
-let [a, setA] = ref(1);
+let [a, setA] = signal(1);
 subscribe(a, (value) => {
     console.log(`a = ${value}`);
 });
@@ -102,8 +104,8 @@ setA(2); // will output: "a = 2"
 
 Subscribe to multiple sources:
 ```js
-let [a, setA] = ref(1);
-let [b, setB] = ref(2);
+let [a, setA] = signal(1);
+let [b, setB] = signal(2);
 subscribe([a, b], (valueA, valueB) => {
     console.log(`a = ${valueA}, b = ${valueB}`);
 });
@@ -116,8 +118,8 @@ Calls a function. During the call collecting active (non-lazy) dependencies, ins
 
 This allow to avoid unnecessary calculations or multiple runs of effect (subscriber) when multiple sources are changed.
 ```js
-let [a, setA] = ref(1);
-let [b, setB] = ref(3);
+let [a, setA] = signal(1);
+let [b, setB] = signal(3);
 let calls = 0;
 
 let c = memo(() => {

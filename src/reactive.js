@@ -99,7 +99,7 @@ function createNode(value, fn, name) {
 	};
 }
 
-export function ref(initial, name) {
+export function signal(initial, name) {
 	const node = createNode(initial, undefined, name || null);
 	node.observers = [];
 	node.observerSlots = [];
@@ -134,7 +134,6 @@ function createEffect(fn, options) {
 			destroyEffect(node);
 		};
 	}
-	node._s = new Set();
 	node.sources = [];
 	node.sourceSlots = [];
 	node.notify = notifyEffect;

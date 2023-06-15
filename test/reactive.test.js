@@ -1,16 +1,16 @@
 import { expect, it } from 'vitest';
-import { ref, memo } from '../src/reactive';
+import { signal, memo } from '../src/reactive';
 
 it('memo get value (a,b)->c test', () => {
-	let [a, setA] = ref(1);
-	let [b, setB] = ref(2);
+	let [a, setA] = signal(1);
+	let [b, setB] = signal(2);
 	let c = memo(() => a() + b());
 	expect(c()).toBe(3);
 });
 
-it('ref notify dependencies only if value changed test', () => {
+it('signal notify dependencies only if value changed test', () => {
 	let calls = 0;
-	let [a, setA] = ref(1);
+	let [a, setA] = signal(1);
 	let b = memo(() => {
 		calls++;
 		return a() + 100;
@@ -24,8 +24,8 @@ it('ref notify dependencies only if value changed test', () => {
 
 it('memo return cached value if dependencies not changed (a,b)->c test', () => {
 	let calls = 0;
-	let [a, setA] = ref(1);
-	let [b, setB] = ref(2);
+	let [a, setA] = signal(1);
+	let [b, setB] = signal(2);
 	let c = memo(() => {
 		calls++;
 		return a() + b();
@@ -39,7 +39,7 @@ it('memo return cached value if dependencies not changed (a,b)->c test', () => {
 
 it('memo return cached value if dependencies not changed a->b->c test', () => {
 	let callsB = 0, callsC = 0;
-	let [a, setA] = ref(1);
+	let [a, setA] = signal(1);
 	let b = memo(() => {
 		callsB++;
 		return a() + 100;
@@ -58,7 +58,7 @@ it('memo return cached value if dependencies not changed a->b->c test', () => {
 });
 
 it('memo update a->b->c test', () => {
-	let [a, setA] = ref(1);
+	let [a, setA] = signal(1);
 	let b = memo(() => a() + 100);
 	let c = memo(() => b() + 100);
 	expect(b()).toBe(101);
@@ -74,8 +74,8 @@ it('memo update a->b->c test', () => {
 });
 
 it('memo update2 (a,b)->c test', () => {
-	let [a, setA] = ref(1);
-	let [b, setB] = ref(2);
+	let [a, setA] = signal(1);
+	let [b, setB] = signal(2);
 	let c = memo(() => a() + b());
 	expect(c()).toBe(3);
 
@@ -87,8 +87,8 @@ it('memo update2 (a,b)->c test', () => {
 });
 
 it('memo update3 (a,b)->c (b update before a) test', () => {
-	let [a, setA] = ref(1);
-	let [b, setB] = ref(2);
+	let [a, setA] = signal(1);
+	let [b, setB] = signal(2);
 	let c = memo(() => a() + b());
 	expect(c()).toBe(3);
 
@@ -101,8 +101,8 @@ it('memo update3 (a,b)->c (b update before a) test', () => {
 
 it('memo lazyness (a,b)->c test', () => {
 	let calls = 0;
-	let [a, setA] = ref(1);
-	let [b, setB] = ref(2);
+	let [a, setA] = signal(1);
+	let [b, setB] = signal(2);
 	let c = memo(() => {
 		calls++;
 		return a() + b();
@@ -118,7 +118,7 @@ it('memo lazyness (a,b)->c test', () => {
 
 it('memo lazyness2 a->b->c test', () => {
 	let callsB = 0, callsC = 0;
-	let [a, setA] = ref(1);
+	let [a, setA] = signal(1);
 	let b = memo(() => {
 		callsB++;
 		return a() + 100;
@@ -138,7 +138,7 @@ it('memo lazyness2 a->b->c test', () => {
 
 it('memo lazyness3 a->b->c (access b before c) test', () => {
 	let callsB = 0, callsC = 0;
-	let [a, setA] = ref(1);
+	let [a, setA] = signal(1);
 	let b = memo(() => {
 		callsB++;
 		return a() + 100;
