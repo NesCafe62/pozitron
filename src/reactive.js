@@ -64,7 +64,7 @@ function updateNode(node) {
 	}
 }
 
-function cleanupNode(node) {
+function cleanupNode(node, destroy = false) {
 	const length = node.sources.length;
 	for (let i = 0; i < length; i += 2) {
 		const source = node.sources[i];
@@ -78,6 +78,10 @@ function cleanupNode(node) {
 		}
 	}
 	// clear sources
+	if (destroy) {
+		node.sources = null;
+		return;
+	}
 	node.sources.splice(0);
 }
 
@@ -118,7 +122,11 @@ function notifyEffect() {
 }
 
 function destroyEffect() {
-	cleanupNode(this);
+	if (!this.sources) {
+		// already destroyed
+		return;
+	}
+	cleanupNode(this, true);
 }
 
 function createEffect(fn, options) {
