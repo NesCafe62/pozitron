@@ -165,17 +165,26 @@ export function untrack(fn) {
 
 // todo: add subscribe and untrack tests
 export function subscribe(getters, fn, options = {}) {
-	const sources = Array.isArray(getters) ? getters : [getters];
-	const node = createEffect(function() {
-		const length = sources.length;
-		const values = Array(length);
-		for (let i = 0; i < length; i++) {
-			values[i] = sources[i]();
-		}
-		Listener = null;
-		fn.apply(null, values);
-		node.needUpdate = false;
-	}, options);
+	let node;
+	if (Array.isArray(getters)) {
+		node = createEffect(function() {
+			const length = getters.length;
+			const values = Array(length);
+			for (let i = 0; i < length; i++) {
+				values[i] = getters[i]();
+			}
+			Listener = null; // untrack
+			fn.apply(null, values);
+			node.needUpdate = false;
+		}, options);
+	} else {
+		node = createEffect(function() {
+			const value = getters();
+			Listener = null; // untrack
+			fn(value);
+			node.needUpdate = false;
+		}, options);
+	}
 	updateNode(node);
 	node.isStatic = true; // freeze node sources
 	return destroyEffect.bind(node);
