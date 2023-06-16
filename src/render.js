@@ -16,6 +16,12 @@ export function h(type, props = null, children = null) {
 		: document.createElement(type);
 	for (let prop in props) {
 		const value = props[prop];
+        if (prop === 'on') {
+            for (let eventType in value) {
+                el.addEventListener(eventType, value[eventType]);
+            }
+            continue;
+        }
 		el.setAttribute(prop, value);
 	}
 	if (children) {
