@@ -1,4 +1,4 @@
-import { subscribe } from 'reactive';
+import { subscribe } from 'pozitron-js';
 
 export function render(app, el) {
 	el.replaceWith(app());
