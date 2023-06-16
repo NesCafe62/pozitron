@@ -7,7 +7,7 @@ export function render(app, el) {
 export function h(type, props = null, children = null) {
 	if (typeof type === 'function') {
 		const componentProps = children
-			? Object.assign({children: children}, props)
+			? Object.assign({children: children}, props || {})
 			: props;
 		return type(componentProps);
 	}
@@ -22,7 +22,11 @@ export function h(type, props = null, children = null) {
 		const length = children.length;
 		for (let i = 0; i < length; i++) {
 			let child = children[i];
-			if (typeof child === 'string') {
+			if (typeof child === 'function') {
+				const getter = child;
+				child = document.createTextNode('');
+				$bindText(child, getter);
+			} else if (typeof child === 'string') {
 				child = document.createTextNode(child);
 			}
 			el.appendChild(child);
