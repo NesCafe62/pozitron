@@ -14,6 +14,10 @@
     "test:ui": "vitest --ui",
     "test:watch": "vitest"
   },
+  "exports": {
+    ".": "./src/reactive.js",
+    "./render": "./src/render.js"
+  },
   "homepage": "https://github.com/NesCafe62/pozitron",
   "bugs": {
     "web": "https://github.com/NesCafe62/pozitron/issues"
