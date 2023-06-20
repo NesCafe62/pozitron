@@ -32,7 +32,10 @@ export function h(type, props = null, children = null) {
 				const getter = child;
 				child = document.createTextNode('');
 				$bindText(child, getter);
-			} else if (typeof child === 'string') {
+			} else if (typeof child !== 'object') {
+				if (typeof child !== 'string') {
+					child = child.toString();
+				}
 				child = document.createTextNode(child);
 			}
 			el.appendChild(child);
