@@ -41,14 +41,18 @@ function readNode() {
 	return this.value;
 }
 
+function notifyNode(node) {
+	const obs = node.observers;
+	const length = obs.length;
+	for (let i = 0; i < length; i += 2) {
+		obs[i].notify();
+	}
+}
+
 function writeNode(newVal) {
 	if (newVal !== this.value) {
 		this.value = newVal;
-		const obs = this.observers;
-		const length = obs.length;
-		for (let i = 0; i < length; i += 2) {
-			obs[i].notify();
-		}
+		notifyNode(this);
 	}
 }
 
@@ -205,11 +209,7 @@ function notifyMemo() {
 	}
 	this.needUpdate = true;
 	cleanupNode(this);
-	const obs = this.observers;
-	const length = obs.length;
-	for (let i = 0; i < length; i += 2) {
-		obs[i].notify();
-	}
+	notifyNode(this);
 }
 
 export function memo(fn, name = null) {
