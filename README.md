@@ -3,6 +3,8 @@ JavaScript lightweight reactivity lib inspired by Vue, $mol, SolidJS, Quarx.
 
 No more virual DOM required. Fine-grained reactivity rocks.
 
+Example Pozitron app built with vite and jxs - [Pozitron starter App](https://github.com/NesCafe62/vite-pozitron-starter)
+
 ## Features
 * lazyness - calculate value only when it's accessed (supported by `memo`)
 * caching - if none of sources were changed getter return cached value (supported by `memo`)
