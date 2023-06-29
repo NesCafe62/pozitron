@@ -8,7 +8,7 @@ Example Pozitron app built with vite and jxs - [Pozitron starter App](https://gi
 ## Features
 * lazyness - calculate value only when it's accessed (supported by `memo`)
 * caching - if none of sources were changed getter return cached value (supported by `memo`)
-* autowiring - dependencies are collected again. means the can change. (allows if-s, branching) (supported by `memo`, `effect`)
+* autowiring - dependencies are re-collected with each calculation func run. means they can change. (allows if-s, branching) (supported by `memo`, `effect`)
 * batch transactions - collect (stash) non-lazy updates during function call and update dependencies only once after batch finished (all dependencies that created with `effect`, `subscribe`)
 
 ## Usage
