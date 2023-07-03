@@ -3,6 +3,8 @@ JavaScript lightweight reactivity lib inspired by Vue, $mol, SolidJS, Quarx.
 
 No more virual DOM required. Fine-grained reactivity rocks.
 
+[CodeSandbox demo](https://codesandbox.io/p/sandbox/pozitron-jsx-app-demo-7hfx7g)
+
 Example Pozitron app built with vite and jxs - [Pozitron starter App](https://github.com/NesCafe62/vite-pozitron-starter)
 
 ## Features
