@@ -1,7 +1,7 @@
 import { subscribe } from 'pozitron-js';
 
-export function render(app, el) {
-	el.replaceWith(app());
+export function render(app, el, props = undefined) {
+	el.replaceWith(app(props));
 }
 
 export function h(type, props = null, children = null) {
