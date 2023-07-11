@@ -170,6 +170,7 @@ export function untrack(fn) {
 // todo: add subscribe and untrack tests
 export function subscribe(getters, fn, options = {}) {
 	let node;
+	const defer = options.defer;
 	if (Array.isArray(getters)) {
 		node = createEffect(function() {
 			const length = getters.length;
@@ -178,18 +179,23 @@ export function subscribe(getters, fn, options = {}) {
 				values[i] = getters[i]();
 			}
 			Listener = null; // untrack
-			fn.apply(null, values);
+			if (!defer) {
+				fn.apply(null, values);
+			}
 			node.needUpdate = false;
 		}, options);
 	} else {
 		node = createEffect(function() {
 			const value = getters();
 			Listener = null; // untrack
-			fn(value);
+			if (!defer) {
+				fn(value);
+			}
 			node.needUpdate = false;
 		}, options);
 	}
 	updateNode(node);
+	defer = false;
 	node.isStatic = true; // freeze node sources
 	return destroyEffect.bind(node);
 }
