@@ -170,7 +170,7 @@ export function untrack(fn) {
 // todo: add subscribe and untrack tests
 export function subscribe(getters, fn, options = {}) {
 	let node;
-	const defer = options.defer;
+	let defer = options.defer;
 	if (Array.isArray(getters)) {
 		node = createEffect(function() {
 			const length = getters.length;
