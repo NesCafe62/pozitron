@@ -115,7 +115,7 @@ export function signal(initial, name = null) {
 
 
 export function voidSignal(name = null) {
-	const node = createNode(null, undefined, name);
+	const node = createNode(undefined, undefined, name);
 	node.observers = [];
 	return [readNode.bind(node), writeVoidNode.bind(node)];
 }
