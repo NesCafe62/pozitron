@@ -44,6 +44,17 @@ setB(obj); // but this will not
 ```
 
 
+### `voidSignal(?name: String)`
+Signal without a cached value. It notifies dependencies each time when gets triggered (in compare - signal notifies only when new value is not the same as previous). Other than that acts like a normal signal.
+
+```js
+let [s, notifyS] = voidSignal();
+
+s(); // returns undefined, used to make reative scope start tracking this signal
+notifyS(); // trigger dependencies update
+```
+
+
 
 ### `memo(calcCallback, ?name: String)`
 Reactive state that value depends on one or multiple reactive sources. Is similar to `signal` but calculated based on other reactive sources.
