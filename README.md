@@ -50,7 +50,7 @@ Signal without a cached value. It notifies dependencies each time when gets trig
 ```js
 let [s, notifyS] = voidSignal();
 
-s(); // returns undefined, used to make reative scope start tracking this signal
+s(); // returns undefined, used to make reactive scope start tracking this signal
 notifyS(); // trigger dependencies update
 ```
 
