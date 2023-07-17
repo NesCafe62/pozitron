@@ -56,10 +56,6 @@ function writeNode(newVal) {
 	}
 }
 
-function writeVoidNode() {
-	notifyNode(this);
-}
-
 function updateNode(node) {
 	const prev = Listener;
 	Listener = node.isStatic ? null : node;
@@ -117,7 +113,7 @@ export function signal(initial, name = null) {
 export function voidSignal(name = null) {
 	const node = createNode(undefined, undefined, name);
 	node.observers = [];
-	return [readNode.bind(node), writeVoidNode.bind(node)];
+	return [readNode.bind(node), () => notifyNode(node)];
 }
 
 
