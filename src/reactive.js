@@ -32,6 +32,10 @@ export function batch(fn) {
 
 let Listener = null;
 
+export function _getListener() { // temporary
+	return Listener;
+}
+
 function readNode() {
 	if (Listener) {
 		const index = Listener.sources.length;
