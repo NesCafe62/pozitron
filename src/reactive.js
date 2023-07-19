@@ -90,7 +90,9 @@ function cleanupNode(node, destroy = false) {
 		node.sources = null;
 		return;
 	}
-	node.sources.splice(0);
+	if (length > 0) {
+		node.sources.splice(0);
+	}
 }
 
 
@@ -126,9 +128,6 @@ function notifyEffect() {
 		return;
 	}
 	this.needUpdate = true;
-	if (!this.isStatic) {
-		cleanupNode(this);
-	}
 	if (batchQueue) {
 		batchQueue.push(this);
 	} else {
@@ -144,21 +143,14 @@ function destroyEffect() {
 	cleanupNode(this, true);
 }
 
-function createEffect(fn, options) {
-	const node = createNode(undefined, fn, options.name || null);
-	if (options.once) {
-		node.fn = function() {
-			fn();
-			destroyEffect(node);
-		};
-	}
-	node.sources = [];
-	node.notify = notifyEffect;
-	return node;
-}
 
 export function effect(fn, options = {}) {
-	const node = createEffect(fn, options);
+	const node = createNode(undefined, function() {
+		cleanupNode(node);
+		fn();
+	}, option.name || null);
+	node.sources = [];
+	node.notify = notifyEffect;
 	updateNode(node);
 	return destroyEffect.bind(node);
 }
@@ -178,12 +170,27 @@ export function untrack(fn) {
 }
 
 
+function createSubscribeEffect(fn, name, once) {
+	const node = createNode(undefined, fn, name);
+	if (once) {
+		node.fn = function () {
+			fn();
+			destroyEffect(node);
+		};
+	}
+	node.sources = [];
+	node.notify = notifyEffect;
+	return node;
+}
+
 // todo: add subscribe and untrack tests
 export function subscribe(getters, fn, options = {}) {
 	let node;
 	let defer = options.defer;
+	const name = options.name || null;
+	const once = options.once && defer;
 	if (Array.isArray(getters)) {
-		node = createEffect(function() {
+		node = createSubscribeEffect( function() {
 			const length = getters.length;
 			const values = Array(length);
 			for (let i = 0; i < length; i++) {
@@ -194,16 +201,16 @@ export function subscribe(getters, fn, options = {}) {
 				fn.apply(null, values);
 			}
 			node.needUpdate = false;
-		}, options);
+		}, name, once);
 	} else {
-		node = createEffect(function() {
+		node = createSubscribeEffect( function() {
 			const value = getters();
 			Listener = null; // untrack
 			if (!defer) {
 				fn(value);
 			}
 			node.needUpdate = false;
-		}, options);
+		}, name, once);
 	}
 	updateNode(node);
 	defer = false;
@@ -225,12 +232,14 @@ function notifyMemo() {
 		return;
 	}
 	this.needUpdate = true;
-	cleanupNode(this);
 	notifyNode(this);
 }
 
 export function memo(fn, name = null) {
-	const node = createNode(null, fn, name);
+	const node = createNode(null, function() {
+		cleanupNode(node);
+		return fn();
+	}, name);
 	node.observers = [];
 	node.sources = [];
 	node.notify = notifyMemo;
