@@ -33,7 +33,7 @@ let [x, setX] = signal(1);
 setX(1); // dependencies will not be notified
 ```
 
-New value is comparted by value (by reference for objects and arrays).
+New value is compared by value (by reference for objects and arrays).
 ```js
 let [a, setA] = signal({x: 1});
 setA({x: 1}); // this will trigger dependencies update
