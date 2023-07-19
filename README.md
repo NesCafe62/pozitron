@@ -77,7 +77,7 @@ console.log(c()); // 3
 
 
 
-### `effect(callback, ?options: {?once: Boolean, ?name: String} = {})`
+### `effect(callback, ?options: {?name: String} = {})`
 Calls a function when any of sources changed.
 
 Runs function single time when created to collect dependencies.
@@ -99,9 +99,11 @@ setB(4); // will output: "a = 2, b = 4"
 
 
 
-### `subscribe(sources, callback, ?options: {?once: Boolean, ?name: String} = {})`
+### `subscribe(sources, callback, ?options: {?defer: Boolean, ?once: Boolean, ?name: String} = {})`
 
 * `sources` - a single getter function or array of getters
+* `defer` - skip running callback immediately
+* `once` - remove subscription after first run (only applies when `defer` option is set)
 
 Calls a function when source changed. More lightweight version of `effect` but for single source.
 
