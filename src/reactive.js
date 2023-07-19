@@ -1,32 +1,41 @@
 let batchQueue = null;
 let batchDepth = 0;
 
-export function batch(fn) {
+function startBatch() {
 	if (batchDepth === 0) {
 		batchQueue = [];
 	}
+}
+
+function finishBatch() {
+	if (batchDepth > 0) {
+		return;
+	}
+	const queue = batchQueue;
+	batchQueue = null;
+	const length = queue.length;
+	const prev = Listener;
+	try {
+		for (let i = 0; i < length; i++) {
+			const node = queue[i];
+			Listener = node.isStatic ? null : node;
+			node.fn();
+			node.needUpdate = false;
+		}
+	} finally {
+		Listener = prev;
+	}
+}
+
+export function batch(fn) {
+	startBatch();
 	batchDepth++;
 	try {
 		fn();
 	} finally {
 		batchDepth--;
 	}
-	if (batchDepth === 0) {
-		const queue = batchQueue;
-		batchQueue = null;
-		const length = queue.length;
-		const prev = Listener;
-		try {
-			for (let i = 0; i < length; i++) {
-				const node = queue[i];
-				Listener = node.isStatic ? null : node;
-				node.fn();
-				node.needUpdate = false;
-			}
-		} finally {
-			Listener = prev;
-		}
-	}
+	finishBatch();
 }
 
 
@@ -48,9 +57,16 @@ function readNode() {
 function notifyNode(node) {
 	const obs = node.observers;
 	const length = obs.length;
+	if (length === 0) {
+		return;
+	}
+	startBatch();
+	batchDepth++;
 	for (let i = 0; i < length; i += 2) {
 		obs[i].notify();
 	}
+	batchDepth--;
+	finishBatch();
 }
 
 function writeNode(newVal) {
@@ -128,7 +144,7 @@ function notifyEffect() {
 		return;
 	}
 	this.needUpdate = true;
-	if (batchQueue) {
+	if (batchQueue) { // probably skip check, expecting that effect can only be notified inside a batch
 		batchQueue.push(this);
 	} else {
 		updateNode(this);
@@ -173,7 +189,7 @@ export function untrack(fn) {
 function createSubscribeEffect(fn, name, once) {
 	const node = createNode(undefined, fn, name);
 	if (once) {
-		node.fn = function () {
+		node.fn = function() {
 			fn();
 			destroyEffect(node);
 		};
