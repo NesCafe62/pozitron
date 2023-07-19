@@ -148,7 +148,7 @@ export function effect(fn, options = {}) {
 	const node = createNode(undefined, function() {
 		cleanupNode(node);
 		fn();
-	}, option.name || null);
+	}, options.name || null);
 	node.sources = [];
 	node.notify = notifyEffect;
 	updateNode(node);
