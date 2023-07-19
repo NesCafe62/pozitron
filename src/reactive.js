@@ -236,7 +236,8 @@ function notifyMemo() {
 }
 
 export function memo(fn, name = null) {
-	const node = createNode(null, function() {
+	// initial value is set to NaN - ensure equality check will fail on first evaluation
+	const node = createNode(NaN, function() {
 		cleanupNode(node);
 		return fn();
 	}, name);
