@@ -105,7 +105,7 @@ setB(4); // will output: "a = 2, b = 4"
 * `defer` - skip running callback immediately
 * `once` - remove subscription after first run (only applies when `defer` option is set)
 
-Calls a function when source changed. More lightweight version of `effect` but for single source.
+Calls a function when source or sources are changed. More lightweight version of `effect` - dependencies created as static and not update on each run.
 
 `Autowiring`: no. use only if result depends on a single reactive source
 
