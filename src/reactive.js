@@ -94,8 +94,8 @@ function cleanupNode(node, destroy = false) {
 		const source = node.sources[i];
 		const sourceSlot = node.sources[i + 1];
 		const observers = source.observers;
-		const obs = observers.pop();
 		const obsSlot = observers.pop();
+		const obs = observers.pop();
 		if (sourceSlot < observers.length) {
 			observers[sourceSlot] = obs;
 			observers[sourceSlot + 1] = obsSlot;
