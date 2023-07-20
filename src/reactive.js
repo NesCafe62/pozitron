@@ -47,9 +47,8 @@ export function _getListener() { // temporary
 
 function readNode() {
 	if (Listener) {
-		const index = Listener.sources.length;
 		Listener.sources.push(this, this.observers.length);
-		this.observers.push(Listener, index);
+		this.observers.push(Listener);
 	}
 	return this.value;
 }
@@ -62,7 +61,7 @@ function notifyNode(node) {
 	}
 	startBatch();
 	batchDepth++;
-	for (let i = 0; i < length; i += 2) {
+	for (let i = 0; i < length; i++) {
 		obs[i].notify();
 	}
 	batchDepth--;
@@ -94,11 +93,9 @@ function cleanupNode(node, destroy = false) {
 		const source = node.sources[i];
 		const sourceSlot = node.sources[i + 1];
 		const observers = source.observers;
-		const obsSlot = observers.pop();
 		const obs = observers.pop();
 		if (sourceSlot < observers.length) {
 			observers[sourceSlot] = obs;
-			observers[sourceSlot + 1] = obsSlot;
 		}
 	}
 	// clear sources
@@ -144,7 +141,7 @@ function notifyEffect() {
 		return;
 	}
 	this.needUpdate = true;
-	if (batchQueue) { // probably skip check, expecting that effect can only be notified inside a batch
+	if (batchQueue) {
 		batchQueue.push(this);
 	} else {
 		updateNode(this);
@@ -167,7 +164,7 @@ export function effect(fn, options = {}) {
 	}, options.name || null);
 	node.sources = [];
 	node.notify = notifyEffect;
-	updateNode(node);
+	updateNode(node); // probably, if we are in a batch just queue node instead
 	return destroyEffect.bind(node);
 }
 
@@ -228,7 +225,7 @@ export function subscribe(getters, fn, options = {}) {
 			node.needUpdate = false;
 		}, name, once);
 	}
-	updateNode(node);
+	updateNode(node); // probably, if we are in a batch just queue node instead
 	defer = false;
 	node.isStatic = true; // freeze node sources
 	return destroyEffect.bind(node);
