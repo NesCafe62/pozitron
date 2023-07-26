@@ -1,5 +1,5 @@
 import { expect, it } from 'vitest';
-import { signal, memo } from '../src/reactive';
+import { signal, memo, effect } from '../src/reactive';
 
 it('memo get value (a,b)->c test', () => {
 	let [a, setA] = signal(1);
@@ -158,4 +158,40 @@ it('memo lazyness3 a->b->c (access b before c) test', () => {
 	c(); // evaludate c
 	expect(callsB).toBe(1);
 	expect(callsC).toBe(1);
+});
+
+it('effect test', () => {
+	let calls = 0;
+	let [a, setA] = signal(1);
+	effect(() => {
+		calls++;
+		a();
+	});
+	expect(calls).toBe(1);
+
+	setA(2);
+	expect(calls).toBe(2);
+
+	setA(3);
+	expect(calls).toBe(3);
+});
+
+it('diamond dependencies a->(b,c)->d test', () => {
+	let calls = 0;
+	let [a, setA] = signal(1);
+	let b = memo(() => {
+		return a() + 1;
+	});
+	let c = memo(() => {
+		return b() + 2;
+	});
+	effect(() => {
+		calls++;
+		c();
+		b();
+	});
+	expect(calls).toBe(1);
+
+	setA(2);
+	expect(calls).toBe(2);
 });
