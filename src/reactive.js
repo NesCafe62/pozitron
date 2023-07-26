@@ -5,37 +5,37 @@ function startBatch() {
 	if (batchDepth === 0) {
 		batchQueue = [];
 	}
+	batchDepth++;
 }
 
 function finishBatch() {
+	batchDepth--;
 	if (batchDepth > 0) {
 		return;
 	}
-	const queue = batchQueue;
-	batchQueue = null;
-	const length = queue.length;
+	batchDepth++;
 	const prev = Listener;
 	try {
-		for (let i = 0; i < length; i++) {
-			const node = queue[i];
+		for (let i = 0; i < batchQueue.length; i++) {
+			const node = batchQueue[i];
 			Listener = node.isStatic ? null : node;
 			node.fn();
 			node.needUpdate = false;
 		}
 	} finally {
 		Listener = prev;
+		batchQueue = null;
+		batchDepth = 0;
 	}
 }
 
 export function batch(fn) {
 	startBatch();
-	batchDepth++;
 	try {
 		fn();
 	} finally {
-		batchDepth--;
+		finishBatch();
 	}
-	finishBatch();
 }
 
 
@@ -60,11 +60,9 @@ function notifyNode(node) {
 		return;
 	}
 	startBatch();
-	batchDepth++;
 	for (let i = 0; i < length; i++) {
 		obs[i].notify();
 	}
-	batchDepth--;
 	finishBatch();
 }
 
