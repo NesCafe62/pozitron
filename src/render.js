@@ -22,7 +22,11 @@ export function h(type, props = null, children = null) {
             }
             continue;
         }
-		el.setAttribute(prop, value);
+		if (typeof value === 'function') {
+			$bindAttr(el, prop, value);
+		} else {
+			el.setAttribute(prop, value);
+		}
 	}
 	if (children) {
 		const length = children.length;
