@@ -22,6 +22,10 @@ export function h(type, props = null, children = null) {
             }
             continue;
         }
+		if (prop === 'ref') {
+			value(el);
+			continue;
+		}
 		el.setAttribute(prop, value);
 	}
 	if (children) {
