@@ -59,10 +59,7 @@ export function $fragment(els) {
 export function $template(render) {
 	let el;
 	return function() {
-		if (!el) {
-			el = render();
-		}
-		return el;
+		return (el || (el = render())).cloneNode(true);
 	}
 }
 
