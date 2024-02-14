@@ -258,3 +258,10 @@ export function memo(fn, name = null) {
 	node.needUpdate = true;
 	return readMemo.bind(node);
 }
+
+
+export function pipeProp(value, setter) {
+	return setter
+		? [value, setter]
+		: signal(value);
+}
