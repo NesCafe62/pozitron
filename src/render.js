@@ -26,11 +26,17 @@ export function h(type, props = null, children = null) {
 			value(el);
 			continue;
 		}
-		if (typeof value === 'function') {
-			$bindAttr(el, prop, value);
-		} else {
-			el.setAttribute(prop, value);
+		if (prop === 'style') {
+			$bindStyle(el, value);
+			continue;
 		}
+		if (prop === 'classList') {
+			$bindClassList(el, value);
+			continue;
+		}
+		(typeof value === 'function')
+			? $bindAttr(el, prop, value)
+			: el.setAttribute(prop, value);
 	}
 	if (children) {
 		const length = children.length;
@@ -79,4 +85,32 @@ export function $bindAttrDirect(el, attrName, getter) {
 	subscribe(getter, function(value) {
 		el[attrName] = value;
 	});
+}
+
+export function $bindClassList(el, classList) {
+	for (const className in classList) {
+		const hasClass = classList[className];
+		const applyClass = function(hasClass) {
+			if (hasClass) {
+				el.classList.add(className);
+			} else {
+				el.classList.remove(className);
+			}
+		};
+		(typeof hasClass === 'function')
+			? subscribe(hasClass, applyClass)
+			: applyClass(hasClass);
+	}
+}
+
+export function $bindStyle(el, styles) {
+	for (const propName in styles) {
+		const value = styles[propName];
+		const applyStyle = function(value) {
+			el.style[propName] = value;
+		};
+		(typeof value === 'function')
+			? subscribe(value, applyStyle)
+			: applyStyle(value);
+	}
 }
