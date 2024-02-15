@@ -211,7 +211,7 @@ export function subscribe(getters, fn, options = {}) {
 			if (!defer) {
 				fn.apply(null, values);
 			}
-			node.needUpdate = false;
+			// node.needUpdate = false; not needed
 		}, name, once);
 	} else {
 		node = createSubscribeEffect( function() {
@@ -220,7 +220,7 @@ export function subscribe(getters, fn, options = {}) {
 			if (!defer) {
 				fn(value);
 			}
-			node.needUpdate = false;
+			// node.needUpdate = false; not needed
 		}, name, once);
 	}
 	updateNode(node); // probably, if we are in a batch just queue node instead
@@ -252,6 +252,38 @@ export function memo(fn, name = null) {
 		cleanupNode(node);
 		return fn();
 	}, name);
+	node.observers = [];
+	node.sources = [];
+	node.notify = notifyMemo;
+	node.needUpdate = true;
+	return readMemo.bind(node);
+}
+
+export function staticMemo(getters, fn) {
+	let node;
+	if (Array.isArray(getters)) {
+		node = createNode(NaN, function() {
+			if (!node.isStatic) {
+				node.isStatic = true; // freeze node sources
+			}
+			const length = getters.length;
+			const values = Array(length);
+			for (let i = 0; i < length; i++) {
+				values[i] = getters[i]();
+			}
+			Listener = null; // untrack
+			return fn.apply(null, values);
+		}); // , name
+	} else {
+		node = createNode(NaN, function() {
+			if (!node.isStatic) {
+				node.isStatic = true; // freeze node sources
+			}
+			const value = getters();
+			Listener = null; // untrack
+			return fn(value);
+		}); // , name
+	}
 	node.observers = [];
 	node.sources = [];
 	node.notify = notifyMemo;
