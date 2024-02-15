@@ -246,42 +246,21 @@ function notifyMemo() {
 	notifyNode(this);
 }
 
-export function memo(fn, name = null) {
+export function memo(fn, options = {}) {
 	// initial value is set to NaN - ensure equality check will fail on first evaluation
-	const node = createNode(NaN, function() {
-		cleanupNode(node);
-		return fn();
-	}, name);
-	node.observers = [];
-	node.sources = [];
-	node.notify = notifyMemo;
-	node.needUpdate = true;
-	return readMemo.bind(node);
-}
-
-export function staticMemo(getters, fn, name = null) {
-	let node;
-	if (Array.isArray(getters)) {
+	const isStatic = options.static;
+	const name = options.name || null;
+	if (isStatic) {
 		node = createNode(NaN, function() {
 			if (!node.isStatic) {
 				node.isStatic = true; // freeze node sources
 			}
-			const length = getters.length;
-			const values = Array(length);
-			for (let i = 0; i < length; i++) {
-				values[i] = getters[i]();
-			}
-			Listener = null; // untrack
-			return fn.apply(null, values);
+			return fn();
 		}, name);
 	} else {
 		node = createNode(NaN, function() {
-			if (!node.isStatic) {
-				node.isStatic = true; // freeze node sources
-			}
-			const value = getters();
-			Listener = null; // untrack
-			return fn(value);
+			cleanupNode(node);
+			return fn();
 		}, name);
 	}
 	node.observers = [];
