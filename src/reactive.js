@@ -259,7 +259,7 @@ export function memo(fn, name = null) {
 	return readMemo.bind(node);
 }
 
-export function staticMemo(getters, fn) {
+export function staticMemo(getters, fn, name = null) {
 	let node;
 	if (Array.isArray(getters)) {
 		node = createNode(NaN, function() {
@@ -273,7 +273,7 @@ export function staticMemo(getters, fn) {
 			}
 			Listener = null; // untrack
 			return fn.apply(null, values);
-		}); // , name
+		}, name);
 	} else {
 		node = createNode(NaN, function() {
 			if (!node.isStatic) {
@@ -282,7 +282,7 @@ export function staticMemo(getters, fn) {
 			const value = getters();
 			Listener = null; // untrack
 			return fn(value);
-		}); // , name
+		}, name);
 	}
 	node.observers = [];
 	node.sources = [];
