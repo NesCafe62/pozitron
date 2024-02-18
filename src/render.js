@@ -16,12 +16,12 @@ export function h(type, props = null, children = null) {
 		: document.createElement(type);
 	for (let prop in props) {
 		const value = props[prop];
-        if (prop === 'on') {
-            for (let eventType in value) {
-                el.addEventListener(eventType, value[eventType]);
-            }
-            continue;
-        }
+	        if (prop === 'on') {
+	            for (let eventType in value) {
+	                el.addEventListener(eventType, value[eventType]);
+	            }
+	            continue;
+	        }
 		if (prop === 'ref') {
 			value(el);
 			continue;
@@ -40,6 +40,9 @@ export function h(type, props = null, children = null) {
 		}
 		if (prop === 'classList') {
 			$bindClassList(el, value);
+			continue;
+		}
+		if (value === undefined) {
 			continue;
 		}
 		(typeof value === 'function')
