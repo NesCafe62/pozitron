@@ -85,7 +85,11 @@ export function $bindText(el, getter) {
 
 export function $bindAttr(el, attrName, getter) {
 	subscribe(getter, function(value) {
-		el.setAttribute(attrName, value);
+		if (value === undefined) {
+			el.removeAttribute(attrName);
+		} else {
+			el.setAttribute(attrName, value);
+		}
 	});
 }
 
