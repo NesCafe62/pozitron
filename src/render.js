@@ -104,6 +104,10 @@ export function $bindClassList(el, classList) {
 }
 
 export function $bindStyle(el, styles) {
+	if (typeof styles === 'string') {
+		el.setAttribute('style', styles);
+		return;
+	}
 	for (const propName in styles) {
 		const value = styles[propName];
 		const applyStyle = function(value) {
