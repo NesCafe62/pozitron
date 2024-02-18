@@ -238,6 +238,14 @@ function readMemo() {
 	return readNode.call(this);
 }
 
+function readMemoUntracked() {
+	if (this.needUpdate) {
+		const newVal = updateNode(this);
+		writeNode.call(this, newVal);
+	}
+	return this.value; // untracted read
+}
+
 function notifyMemo() {
 	if (this.needUpdate) {
 		return;
@@ -266,7 +274,14 @@ export function memo(fn, options = {}) {
 	node.sources = [];
 	node.notify = notifyMemo;
 	node.needUpdate = true;
-	return readMemo.bind(node);
+	return options.untracked
+		? readMemoUntracked.bind(node)
+		: readMemo.bind(node);
+}
+
+// static untracked memo
+export function sMemo(fn) {
+	return memo(fn, {isStatic: true, untracked: true});
 }
 
 
