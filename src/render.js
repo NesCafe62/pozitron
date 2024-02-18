@@ -26,7 +26,11 @@ export function h(type, props = null, children = null) {
 			value(el);
 			continue;
 		}
-		if (prop === 'style') {
+		if (
+			prop === 'style' &&
+			typeof value === 'object' &&
+			value !== null
+		) {
 			$bindStyle(el, value);
 			continue;
 		}
@@ -104,15 +108,15 @@ export function $bindClassList(el, classList) {
 }
 
 export function $bindStyle(el, styles) {
-	if (typeof styles === 'string') {
-		el.setAttribute('style', styles);
-		return;
-	}
 	for (const propName in styles) {
 		const value = styles[propName];
-		const applyStyle = function(value) {
-			el.style[propName] = value;
-		};
+		const applyStyle = propName.startsWith('--')
+			? function(value) {
+				el.style.setProperty(propName, value);
+			}
+			: function(value) {
+				el.style[propName] = value;
+			};
 		(typeof value === 'function')
 			? subscribe(value, applyStyle)
 			: applyStyle(value);
