@@ -26,6 +26,10 @@ export function h(type, props = null, children = null) {
 			value(el);
 			continue;
 		}
+		if (prop === 'show') {
+			$bindShow(el, value);
+			continue;
+		}
 		if (
 			prop === 'style' &&
 			typeof value === 'object' &&
@@ -105,6 +109,15 @@ export function $bindClassList(el, classList) {
 			? subscribe(hasClass, applyClass)
 			: applyClass(hasClass);
 	}
+}
+
+export function $bindShow(el, getter) {
+	const applyStyle = function(isShow) {
+		el.style.display = isShow ? '' : 'none';
+	};
+	(typeof getter === 'function')
+		? subscribe(getter, applyStyle)
+		: applyStyle(getter);
 }
 
 export function $bindStyle(el, styles) {
