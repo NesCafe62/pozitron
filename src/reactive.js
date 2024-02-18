@@ -256,6 +256,7 @@ function notifyMemo() {
 
 export function memo(fn, options = {}) {
 	// initial value is set to NaN - ensure equality check will fail on first evaluation
+	let node;
 	const name = options.name || null;
 	if (options.isStatic) {
 		node = createNode(NaN, function() {
