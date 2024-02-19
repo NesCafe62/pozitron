@@ -45,6 +45,12 @@ export function h(type, props = null, children = null) {
 		if (value === undefined) {
 			continue;
 		}
+		if (prop === 'innerHTML') {
+			(typeof value === 'function')
+				? $bindAttrDirect(el, prop, value)
+				: el.innerHTML = value;
+			continue;
+		}
 		(typeof value === 'function')
 			? $bindAttr(el, prop, value)
 			: el.setAttribute(prop, value);
@@ -87,10 +93,6 @@ export function $bindText(el, getter) {
 }
 
 export function $bindAttr(el, attrName, getter) {
-	if (attrName === 'innerHTML') {
-		$bindAttrDirect(el, attrName, getter);
-		return;
-	}
 	subscribe(getter, function(value) {
 		if (value === undefined) {
 			el.removeAttribute(attrName);
