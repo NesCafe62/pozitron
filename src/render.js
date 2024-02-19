@@ -87,6 +87,10 @@ export function $bindText(el, getter) {
 }
 
 export function $bindAttr(el, attrName, getter) {
+	if (attrName === 'innerHTML') {
+		$bindAttrDirect(el, attrName, getter);
+		return;
+	}
 	subscribe(getter, function(value) {
 		if (value === undefined) {
 			el.removeAttribute(attrName);
