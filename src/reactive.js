@@ -130,7 +130,10 @@ export function signal(initial, name = null) {
 export function voidSignal(name = null) {
 	const node = createNode(undefined, undefined, name);
 	node.observers = [];
-	return [readNode.bind(node), () => notifyNode(node)];
+	return [
+		(value) => (readNode.call(node), value),
+		() => notifyNode(node)
+	];
 }
 
 
