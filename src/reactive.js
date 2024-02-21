@@ -71,6 +71,7 @@ function writeNode(newVal) {
 		this.value = newVal;
 		notifyNode(this);
 	}
+	return newVal;
 }
 
 function updateNode(node) {
