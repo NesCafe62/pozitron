@@ -45,12 +45,12 @@ export function _getListener() { // temporary
 	return Listener;
 }
 
-function readNode() {
+function readNode(fn = undefined) {
 	if (Listener) {
 		Listener.sources.push(this, this.observers.length);
 		this.observers.push(Listener);
 	}
-	return this.value;
+	return fn ? fn(this.value) : this.value;
 }
 
 function notifyNode(node) {
