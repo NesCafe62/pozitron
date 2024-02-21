@@ -121,10 +121,15 @@ function createNode(value, fn, name) {
 	};
 }
 
-export function signal(initial, name = null) {
-	const node = createNode(initial, undefined, name);
+export function signal(initial, options = {}) {
+	const set = options.set;
+	const node = createNode(initial, undefined, options.name || null);
 	node.observers = [];
-	return [readNode.bind(node), writeNode.bind(node)];
+	const write = writeNode.bind(node);
+	const setter = set
+		? setter = () => (value) => write(set(value))
+		: write;
+	return [readNode.bind(node), setter];
 }
 
 
