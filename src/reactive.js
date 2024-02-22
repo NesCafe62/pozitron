@@ -127,7 +127,7 @@ export function signal(initial, options = {}) {
 	node.observers = [];
 	const write = writeNode.bind(node);
 	const setter = set
-		? setter = () => (value) => write(set(value))
+		? () => (value) => write(set(value))
 		: write;
 	return [readNode.bind(node), setter];
 }
