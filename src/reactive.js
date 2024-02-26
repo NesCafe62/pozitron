@@ -252,7 +252,7 @@ function readMemoUntracked() {
 		const newVal = updateNode(this);
 		writeNode.call(this, newVal);
 	}
-	return this.value; // untracted read
+	return this.value; // untracked read
 }
 
 function notifyMemo() {
