@@ -17,7 +17,7 @@ Example Pozitron app built with vite and jxs - [Pozitron starter App](https://gi
 
 ## Usage
 
-### `signal(initialValue, ?name: String)`
+### `signal(initialValue, ?options: {?set: Function, ?name: String} = {})`
 A source of changes propagation. State contains a single value.
 
 Reactive state that can have multiple dependencies (subscribers).
@@ -44,6 +44,40 @@ let obj = {x: 1};
 let [b, setB] = signal(obj);
 setB(obj); // but this will not
 ```
+
+Second arguemnt `options` has `set` parameter. Each time signal gets a new value, it is passed through that function
+```js
+let [a, setA] = signal(1, { set: (val) => val * 2 });
+setA(2);
+console.log(a()); // 4
+```
+
+Getter can be called with function as argument. This function is called immediately, signal's value is passed through that function.
+
+It is useful for transforming the value
+```js
+let [a, setA] = signal({x: 1});
+console.log(a(a => a.x)); // 1
+```
+
+Or when value is used multiple times useful for removing the cost of multiple function calls
+```
+let [selectedOption, setSelectedOption] = signal(undefined);
+const value = () => (
+    selectedOption((option) => option ? option.value : undefined)
+);
+/* same as doing:
+const value = () => {
+    let option = selectedOption();
+    return option ? option.value : undefined;
+}; */
+
+console.log(value()); // undefined
+
+setSelectedOption({value: 1});
+console.log(value()); // 1
+```
+
 
 
 ### `voidSignal(?name: String)`
