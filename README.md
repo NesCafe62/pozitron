@@ -1,3 +1,5 @@
+<img src="https://github.com/NesCafe62/pozitron/assets/1944556/619901fd-f904-4f94-a508-635c7e0f4b59" width="140" height="140">
+
 # Pozitron
 JavaScript lightweight reactivity lib inspired by Vue, $mol, SolidJS, Quarx.
 
