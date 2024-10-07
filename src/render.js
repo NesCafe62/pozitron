@@ -16,6 +16,7 @@ export function h(type, props = null, children = null) {
 	const el = (type === '')
 		? document.createDocumentFragment()
 		: document.createElement(type);
+	let ref;
 	for (let prop in props) {
 		const value = props[prop];
 	        if (prop === 'on') {
@@ -25,7 +26,7 @@ export function h(type, props = null, children = null) {
 	            continue;
 	        }
 		if (prop === 'ref') {
-			value(el);
+			ref = value;
 			continue;
 		}
 		if (prop === 'show') {
@@ -74,6 +75,7 @@ export function h(type, props = null, children = null) {
 			el.appendChild(child);
 		}
 	}
+	ref && ref(el);
 	return el;
 }
 
