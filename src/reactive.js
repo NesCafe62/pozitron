@@ -287,7 +287,6 @@ export function memo(fn, options = {}) {
 	} else {
 		node = createNode(NaN, function() {
 			cleanupNode(node);
-			options.x && options.x();
 			return fn();
 		}, name);
 	}
