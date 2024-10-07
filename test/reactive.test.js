@@ -195,3 +195,21 @@ it('diamond dependencies a->(b,c)->d test', () => {
 	setA(2);
 	expect(calls).toBe(2);
 });
+
+it('double memo derive from same signal a->(b,c) test', () => {
+	const [a, setA] = signal(0);
+
+	const b = memo(() => a());
+	const c = memo(() => a() * 10);
+
+	expect(b()).toBe(0);
+	expect(c()).toBe(0);
+
+	setA(1);
+	expect(b()).toBe(1);
+	expect(c()).toBe(10);
+
+	setA(2);
+	expect(b()).toBe(2);
+	expect(c()).toBe(20);
+});

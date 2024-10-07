@@ -45,12 +45,19 @@ export function _getListener() { // temporary
 	return Listener;
 }
 
+/* export function _getNode(getter) { // for debug
+	let node;
+	getter((_, n) => { node = n });
+	return node;
+} */
+
 function readNode(fn = undefined) {
 	if (Listener) {
+		const obsSlot = Listener.sources.length;
 		Listener.sources.push(this, this.observers.length);
-		this.observers.push(Listener);
+		this.observers.push(Listener, obsSlot);
 	}
-	return fn ? fn(this.value) : this.value;
+	return fn ? fn(this.value, this) : this.value;
 }
 
 function notifyNode(node) {
@@ -60,7 +67,7 @@ function notifyNode(node) {
 		return;
 	}
 	startBatch();
-	for (let i = 0; i < length; i++) {
+	for (let i = 0; i < length; i += 2) {
 		obs[i].notify();
 	}
 	finishBatch();
@@ -92,9 +99,12 @@ function cleanupNode(node, destroy = false) {
 		const source = node.sources[i];
 		const sourceSlot = node.sources[i + 1];
 		const observers = source.observers;
+		const obsSlot = observers.pop();
 		const obs = observers.pop();
 		if (sourceSlot < observers.length) {
+			obs.sources[obsSlot + 1] = sourceSlot;
 			observers[sourceSlot] = obs;
+			observers[sourceSlot + 1] = obsSlot;
 		}
 	}
 	// clear sources
@@ -277,6 +287,7 @@ export function memo(fn, options = {}) {
 	} else {
 		node = createNode(NaN, function() {
 			cleanupNode(node);
+			options.x && options.x();
 			return fn();
 		}, name);
 	}
